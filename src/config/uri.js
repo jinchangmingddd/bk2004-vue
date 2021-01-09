@@ -11,5 +11,9 @@ export default {
     getNowPlaying: prefix + "getNowPlayingFilmList",
     // 获取即将上映
     getComingSoon: prefix + "getComingSoonFilmList",
+    // 获取详情信息
+    getDetail: prefix + "getFilmInfo",
+    // 获取城市信息
+    getCityInfo: prefix + "getCitiesInfo",
     // ...
 }

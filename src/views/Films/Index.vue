@@ -7,7 +7,7 @@
 </template>
 
 <script>
-// 导入头部导航组件
+// 导入头部导航组件，因为它只在电影页面显示
 import Header from "@/components/Navigation/Header";
 export default {
   components: {

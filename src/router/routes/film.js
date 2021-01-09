@@ -3,7 +3,6 @@ import nowPlaying from "@/views/Films/NowPlaying"
 import comingSoon from "@/views/Films/ComingSoon"
 import Detail from "@/views/Films/Detail";
 
-
 var film = [
     {
         // 父路由

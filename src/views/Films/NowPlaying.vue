@@ -1,11 +1,16 @@
 <template>
-  <div>
+  <div class="container">
+
+
+
+      <van-pull-refresh v-model="isLoading2" @refresh="onRefresh">
+
       <!-- v-show控制组件是否显示 -->
       <div class="load" v-show="isLoading">
           <van-loading size="24" type="spinner">加载中...</van-loading>
       </div>
 
-    <van-card v-for="item in list" :key="item.filmId">
+    <van-card v-for="item in list" :key="item.filmId" @click="goDetail(item.filmId)">
         <!-- 封面图片 -->
         <template #thumb>
             <img :src="item.poster" width="66">
@@ -20,6 +25,7 @@
         <!-- 电影介绍 -->
         <template #desc>
             <div class="dianyinginfo">
+                <div class="buypiao">购票</div>
                 <div class="gzpf">
                     观众评分 <span class="pingfen"> {{item.grade}}</span>
                 </div>
@@ -29,21 +35,24 @@
                 <div class="minite">
                     {{item.nation}} | {{item.runtime}} 分钟
                 </div>
-                <div class="buypiao">购票</div>
             </div>
         </template>
     </van-card>
+    </van-pull-refresh>
   </div>
 </template>
 <script>
+
+
 // 导入地址模块
 import uri from "@/config/uri";
 // 导  入vant组件
 import Vue from "vue";
-import { Card, Toast , Loading } from "vant";
+import { Card, Toast , Loading, PullRefresh } from "vant";
 Vue.use(Card);
 Vue.use(Toast);
 Vue.use(Loading);
+Vue.use(PullRefresh);
 
 export default {
     data(){
@@ -53,8 +62,49 @@ export default {
 
             // 控制加载组件是否显示
             isLoading: true,
+            // 控制下拉刷新的加载提示的
+            isLoading2: true,
+            // 默认页码
+            pageNum: 1,
         }
     },
+    methods:{
+        // 专门用来获取网络请求的
+        getDate(){
+            this.$http.get(uri.getNowPlaying + "?pageNum="+this.pageNum).then(ret=>{
+            console.log(ret);
+            if(ret.status == 0){
+                
+                    if(this.pageNum <= Math.ceil(ret.data.total/10)){
+                        // 请求成功(注意新旧数据的整合)
+                            // 旧数据        新数据
+                        // this.list = ret.data.films;
+                        this.list = [...ret.data.films,...this.list];
+                        // 让页码加1
+                        this.pageNum++;
+                    }
+            }else{
+                // 请求失败
+                Toast.fail("网络繁忙");
+            }
+            // 数据加载完成，去除加载组件的显示
+            this.isLoading = false;
+            this.isLoading2 = false;
+        });
+        },
+        onRefresh(){
+            // 发送请求
+            this.getDate();
+        },
+        // 编程式导航，去详情页面
+        goDetail(filmId){
+            // console.log(filmId);
+            // 切记不要给filmid前面加上“：”
+            this.$router.push("/film/" + filmId);
+        },
+    },
+
+
     // 过滤器
     filters: {
         // 处理演员信息
@@ -73,20 +123,10 @@ export default {
         }
     },
 
+    // 发送请求
     created(){
-        this.$http.get(uri.getNowPlaying).then(ret=>{
-            console.log(ret);
-            if(ret.status == 0){
-                // 请求成功
-                this.list = ret.data.films;
-            }else{
-                // 请求失败
-                Toast.fail("网络繁忙");
-            }
-            // 数据加载完成，去除加载组件的显示
-            this.isLoading = false;
-        });
-
+        // 这里默认请求第一页的数据
+        this.getDate();
     }
 };
 </script>
@@ -134,17 +174,18 @@ export default {
 
     // 购票
     .buypiao{
-        width: 44px;
-        height: 22px;
+         float: right;
+        line-height: 25px;
+        height: 25px;
+        width: 50px;
+        color: #ff5f16;
+        font-size: 13px;
+        text-align: center;
+        border-radius: 2px;
         border: 1px solid #ff5f16;
         border-radius: 4px;
-        text-align: center;
-        line-height: 20px;
-        color: #ff5f16;
-        position: absolute;
-        left: 162px;
-        top: 2px;
     }
+
     .van-card{
         background-color: white;
     }
@@ -156,6 +197,9 @@ export default {
     }
     .gzpf{
         margin: 3px 0px;
+    }
+    .container{
+        margin-bottom: 50px;
     }
 
 
